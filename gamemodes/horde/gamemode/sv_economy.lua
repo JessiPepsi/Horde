@@ -18,7 +18,6 @@ util.AddNetworkString("Horde_BuySpell")
 util.AddNetworkString("Horde_SellItem")
 util.AddNetworkString("Horde_SelectClass")
 util.AddNetworkString("Horde_InitClass")
-util.AddNetworkString("Horde_SyncEconomy")
 util.AddNetworkString("Horde_SyncDifficulty")
 util.AddNetworkString("Horde_RemoveReadyPanel")
 util.AddNetworkString("Horde_SyncMaxWeight")
@@ -239,13 +238,22 @@ function plymeta:Horde_PayPlayer(plyToPay, amount)
         return
     end
 
+    local searchName = string.lower(plyToPay)
+
     local plyForMoney
     local allPlys = player.GetAll()
     local Matches = {}
-    for _,v in ipairs(allPlys) do
-        local findString = string.find(string.lower(v:GetName()), string.lower(plyToPay))
-        if findString then
-            table.insert(Matches, v)
+
+    for _, v in ipairs( allPlys ) do
+        local lowerName = string.lower( v:GetName() )
+
+        if lowerName == searchName then
+            plyForMoney = v
+            break
+        end
+
+        if string.find( lowerName, searchName ) then
+            table.insert( Matches, v )
             plyForMoney = v
         end
     end
@@ -258,15 +266,18 @@ function plymeta:Horde_PayPlayer(plyToPay, amount)
         self:ChatPrint("Multiple players have given name:"..Names)
         return
     end
+
     if plyForMoney == nil then self:ChatPrint("Invalid player.") return end
-    if plyForMoney:SteamID() == self:SteamID() then return end -- Not that this really matters but it'd be a bit silly 
-    local amount = math.floor(amount)
+    if plyForMoney == self then self:ChatPrint("You can't pay yourself.") return end
+
+    amount = math.floor(amount)
     if not amount or amount <= 0 or self:Horde_GetMoney() < amount then return end
     self:Horde_AddMoney(-amount)
     self:Horde_SyncEconomy()
     plyForMoney:Horde_AddMoney(amount)
     plyForMoney:Horde_SyncEconomy()
     plyForMoney:ChatPrint(self:GetName().." has given you "..amount.."$")
+    self:ChatPrint("You have given "..plyForMoney:GetName().." "..amount.."$")
     self.nextPayTime = CurTime() + 1.5
 end
 
@@ -278,16 +289,59 @@ function plymeta:Horde_GetWeight()
     return self.Horde_weight or 0
 end
 
+util.AddNetworkString( "horde_sync_money" )
+util.AddNetworkString( "horde_sync_weight" )
+util.AddNetworkString( "horde_sync_skull_tokens" )
+util.AddNetworkString( "horde_sync_drop_entities" )
+util.AddNetworkString( "horde_sync_subclass" )
+
 function plymeta:Horde_SyncEconomy()
     if not self:IsValid() then return end
-    if not self.Horde_money or not self.Horde_weight or not self.Horde_class then return end
-    net.Start("Horde_SyncEconomy")
-        net.WriteEntity(self)
-        net.WriteInt(self.Horde_money, 32)
-        net.WriteInt(self.Horde_skull_tokens or 0, 32)
-        net.WriteInt(self.Horde_weight, 32)
-        net.WriteString(self:Horde_GetSubclass(self.Horde_class.name))
-        net.WriteTable(self.Horde_drop_entities)
+
+    local selfTbl = self:GetTable()
+    if not selfTbl.Horde_money or not selfTbl.Horde_weight or not selfTbl.Horde_class then return end
+
+    if selfTbl.Horde_money ~= selfTbl.Horde_money_last then
+        selfTbl.Horde_money_last = selfTbl.Horde_money
+
+        net.Start( "horde_sync_money" )
+            net.WriteEntity( self )
+            net.WriteUInt( selfTbl.Horde_money, 16 )
+        net.Broadcast()
+    end
+
+    if selfTbl.Horde_weight ~= selfTbl.Horde_weight_last then
+        selfTbl.Horde_weight_last = selfTbl.Horde_weight
+
+        net.Start( "horde_sync_weight" )
+            net.WriteUInt( selfTbl.Horde_weight, 5 )
+        net.Send( self )
+    end
+
+    if selfTbl.Horde_skull_tokens ~= selfTbl.Horde_skull_tokens_last then
+        selfTbl.Horde_skull_tokens_last = selfTbl.Horde_skull_tokens
+
+        net.Start( "horde_sync_skull_tokens" )
+            net.WriteUInt( selfTbl.Horde_skull_tokens, 14 )
+        net.Send( self )
+    end
+
+    if #selfTbl.Horde_drop_entities ~= 0 then
+        local json = util.TableToJSON( selfTbl.Horde_drop_entities )
+        local crc = util.CRC( json )
+        if selfTbl.Horde_drop_entities_crc ~= crc then
+            selfTbl.Horde_drop_entities_crc = crc
+
+            net.Start( "horde_sync_drop_entities" )
+                net.WriteTable( selfTbl.Horde_drop_entities )
+            net.Send( self )
+        end
+    end
+
+    local subclass = self:Horde_GetSubclass( selfTbl.Horde_class.name )
+    net.Start( "horde_sync_subclass" )
+        net.WriteEntity( self )
+        net.WriteString( subclass )
     net.Broadcast()
 end
 
@@ -315,7 +369,7 @@ hook.Add("PlayerSpawn", "Horde_Economy_Sync", function (ply)
 
     if HORDE.start_game and HORDE.current_break_time <= 0 then
         if ply:IsValid() then
-            local ret = hook.Run("Horde_OnPlayerShouldRespawnDuringWave")
+            local ret = hook.Run( "Horde_OnPlayerShouldRespawnDuringWave", ply )
             if not ret then
                 ply:KillSilent()
                 HORDE:SendNotification("You will respawn next wave.", 0, ply)
@@ -766,7 +820,7 @@ hook.Add("OnPlayerPhysicsDrop", "Horde_TurretDrop", function (ply, ent, thrown)
         if ent:GetClass() == "npc_vj_horde_rocket_turret" || ent:GetClass() == "npc_vj_horde_laser_turret" then
             ent:SetAngles(Angle(0,0,0))
         end
-        
+
         HORDE:DropTurret(ent)
     end
 end)
@@ -967,7 +1021,7 @@ net.Receive("Horde_BuyItemAmmoSecondary", function (len, ply)
         HORDE:SendNotification("You don't have this weapon!", 0, ply)
         return
     end
-    
+
     local price = HORDE.items[class].secondary_ammo_price * count
     if ply:Horde_GetMoney() >= price then
         ply:Horde_AddMoney(-price)

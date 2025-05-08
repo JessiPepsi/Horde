@@ -32,7 +32,7 @@ function HORDE:BroadcastEnemiesCountMessage(is_boss, wave_str, count)
     net.Start("Horde_RenderEnemiesCount")
         net.WriteBool(is_boss)
         net.WriteString(wave_str)
-        net.WriteInt(count, 32)
+        net.WriteUInt(count, 12)
     net.Broadcast()
 end
 
@@ -79,7 +79,7 @@ function Ready(ply)
     net.Broadcast()
 
     if HORDE.start_game and HORDE.current_wave > 0 then return end
-    HORDE:BroadcastPlayersReadyMessage(tostring(ready_count) .. "/" .. tostring(total_player))
+    HORDE:BroadcastPlayersReadyMessage(tostring(readyCount) .. "/" .. tostring(totalPlayers))
 end
 
 local function End(ply)

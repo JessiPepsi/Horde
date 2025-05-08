@@ -99,7 +99,7 @@ end
 function HORDE:GetReadyPlayers()
     local ready_count = 0
     local countable_players = 0
-    for _, ply in pairs( player.GetAll() ) do
+    for _, ply in pairs( player.GetHumans() ) do
         local should_count = HORDE:ShouldCountPlayer( ply )
         if should_count ~= false then
             if HORDE.player_ready[ply] == 1 then
@@ -387,6 +387,8 @@ end)
 
 -- Player Spawn Initialize
 function HORDE:PlayerInit(ply)
+    if ply.Horde_Init_Complete then return end
+
     HORDE.current_players = player.GetAll()
     HORDE:LoadRank(ply)
 
@@ -664,9 +666,11 @@ hook.Add("PlayerSpawn", "Horde_PlayerInitialSpawn", function(ply)
     if ply:IsValid() then
         ply:SetCollisionGroup(15)
         ply:SetCanZoom(false)
-        ply:ConCommand([[mat_colorcorrection 1]])
-        ply:ConCommand([[cl_showhints 0]])
+        ply:ConCommand("mat_colorcorrection 1")
+        ply:ConCommand("cl_showhints 0")
+        ply:ConCommand("arccw_automaticreload 1")
         ply:SetMoveType(MOVETYPE_WALK)
+        ply:SetAvoidPlayers(false)
     end
 
     for _, ent in pairs( ents.GetAll() ) do
@@ -862,7 +866,7 @@ hook.Add("DoPlayerDeath", "Horde_DoPlayerDeath", function(victim)
     end
     if (not HORDE.start_game) or (HORDE.current_break_time > 0) then
         timer.Simple(1, function() if victim:IsValid() then
-            victim:Spawn()
+           victim:Spawn()
         end end)
         return
     end
@@ -876,3 +880,8 @@ hook.Add("DoPlayerDeath", "Horde_DoPlayerDeath", function(victim)
         net.Send(victim)
     end
 end)
+
+-- Prevents force killing on spawns https://github.com/Facepunch/garrysmod/blob/eedfd0de87da7617417a1361b899ca2366b7e78e/garrysmod/gamemodes/base/gamemode/player.lua#L347-L349
+function GM:IsSpawnpointSuitable( _ply, _spawnpointent, _makeSuitable )
+    return true
+end
