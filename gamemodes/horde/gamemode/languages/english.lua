@@ -349,8 +349,9 @@ LANGUAGE["Perk_cremator_base"] = [[
 The Cremator builds its offense and defense around Fire damage.
 Complexity: EASY
 
-{8} increased Fire damage resistance.
+{8} increased Fire damage resistance and immune to Ignite.
 Attacks have {5} chance to Ignite enemies.
+Regenerate a Molotov every 45 seconds.
 {1} increased Ignite damage. ({3} per level, up to {4}).
 
 Ignite base duration is {6} and deals damage over time based on hit damage.
@@ -1043,12 +1044,16 @@ LANGUAGE["Item_F2000"] = [[F2000]]
 LANGUAGE["Item_Desc_F2000"] = [[
 FN F2000.
 An ambidextrous bullpup rifle developed by FN.
+Equipped with an M203 underbarrel incendiary grenade launcher.
+Press USE+RELOAD to equip M203.
 ]]
 
 LANGUAGE["Item_Tavor"] = [[Tavor]]
 LANGUAGE["Item_Desc_Tavor"] = [[
 IWI Tavor-21.
 Designed to maximize reliability, durability, and simplicity.
+Equipped with an M203 underbarrel shock grenade launcher.
+Press USE+RELOAD to equip M203.
 ]]
 
 
@@ -1166,7 +1171,7 @@ Shoots incendiary grenades the erupt into flames on impact.
 LANGUAGE["Item_Heat Crossbow"] = [[Heat Crossbow]]
 LANGUAGE["Item_Desc_Heat Crossbow"] = [[
 Improvised sniper weapon.
-Has two firemodes (Ballistic/Impact).
+Has two firemodes that can be swapped between to deal either Ballistic or Fire damage.
 
 Deals 300% headshot damage.
 ]]
@@ -1603,6 +1608,7 @@ LANGUAGE["Gadget_Desc_gadget_berserk_armor"] = [[
 {1} increased damage.
 {2} increased Global damage resistance.
 {3} increased move speed.
+{4} increased jump height.
 ]]
 
 LANGUAGE["Gadget_gadget_flash"] = [[Flash]]
@@ -1668,6 +1674,6 @@ Deals 20 base Ignite damage.
 
 LANGUAGE["Gadget_barbeque"] = [[Barbeque]]
 LANGUAGE["Gadget_Desc_gadget_barbeque"] = [[
+Dealing Fire damage heals you for {1} of your max health.
 Ignited enemies killed by you drop edible gibs.
-Each gib restores 5 health.
-]]
+Each gib restores {2} of your max health.]]

@@ -63,6 +63,11 @@ end
 function SWEP:PrimaryAttack()
     local owner = self:GetOwner()
     if (not self:CanPrimaryAttack()) then return end
+	
+    if self.Owner:IsValid() and self.Owner:GetAmmoCount("horde_m2_flamethrower") > 0 then
+    self:SetClip1(101)
+    self:GetOwner():SetAmmo(self.Owner:GetAmmoCount("horde_m2_flamethrower") - 1, "horde_m2_flamethrower")
+    end
 
     self:TakePrimaryAmmo(1)
     owner:MuzzleFlash()
@@ -84,7 +89,7 @@ function SWEP:PrimaryAttack()
             dmg:SetAttacker(owner)
             dmg:SetInflictor(self)
             dmg:SetDamageType(DMG_BURN)
-            dmg:SetDamage(20)
+            dmg:SetDamage(40)
             util.BlastDamageInfo(dmg, trace.HitPos, 128)
 
             if SERVER and trace.Hit then

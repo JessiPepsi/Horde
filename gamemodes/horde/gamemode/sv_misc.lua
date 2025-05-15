@@ -26,7 +26,7 @@ function HORDE:GetAntlionMinionsCount(ply)
     local count = 0
     if not HORDE.player_drop_entities[ply:SteamID()] then return 0 end
     for id, ent in pairs(HORDE.player_drop_entities[ply:SteamID()]) do
-        if ent:IsNPC() and ent:GetClass() == "npc_vj_horde_antlion" then
+        if IsValid( ent ) and ent:IsNPC() and ent:GetClass() == "npc_vj_horde_antlion" then
             count = count + 1
         end
     end
@@ -130,6 +130,8 @@ function HORDE:SpawnManhack(ply, id)
         ent:AddRelationship("npc_vj_horde_vortigaunt D_LI 99")
         ent:AddRelationship("npc_vj_horde_combat_bot D_LI 99")
         ent:AddRelationship("npc_turret_floor D_LI 99")
+        ent:AddRelationship("npc_vj_horde_class_survivor D_LI 99")
+        ent:AddRelationship("npc_vj_horde_class_assault D_LI 99")
         ent.VJ_NPC_Class = {"CLASS_PLAYER_ALLY"}
     end)
     ent:SetOwner(ply)
@@ -281,36 +283,4 @@ function HORDE:SimpleParticleSystem(particle_name, pos, angles, parent)
     p:Activate()
     p:Fire( "start", "", 0 )
     return p
-end
-
--- Only send player death notices
-function GM:SendDeathNotice( attacker, inflictor, victim, flags )
-    if isstring( victim ) then return end
-
-    net.Start( "DeathNoticeEvent" )
-        if ( isstring( attacker ) ) then
-            net.WriteUInt( 1, 2 )
-            net.WriteString( attacker )
-        elseif ( IsValid( attacker ) ) then
-            net.WriteUInt( 2, 2 )
-            net.WriteEntity( attacker )
-        else
-            -- TODO: game.GetWorld will be "written" here, because its not IsValid. Make it write a separate type?
-            net.WriteUInt( 0, 2 )
-        end
-
-        net.WriteString( inflictor )
-
-        if ( isstring( victim ) ) then
-            net.WriteUInt( 1, 2 )
-            net.WriteString( victim )
-        elseif ( IsValid( victim ) ) then
-            net.WriteUInt( 2, 2 )
-            net.WriteEntity( victim )
-        else
-            net.WriteUInt( 0, 2 )
-        end
-
-        net.WriteUInt( flags, 8 )
-    net.Broadcast()
 end
