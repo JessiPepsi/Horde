@@ -2,51 +2,43 @@ function EFFECT:Init(data)
 	local Startpos = self:GetTracerShootPos(self.Position, data:GetEntity(), data:GetAttachment())
 	local Hitpos = data:GetOrigin()
 	local ent = data:GetEntity()
-    if not IsValid(ent) then return end
+	if not IsValid(ent) then return end
 
-    local owner = ent.Owner
-	local has_burner = nil
-	if IsValid( owner ) and owner:Horde_GetGadget() == "gadget_hydrogen_burner" then
-		has_burner = true
-	end
-
-	if data:GetEntity():IsValid() && Startpos && Hitpos then
+	if data:GetEntity():IsValid() and Startpos and Hitpos then
 		self.Emitter = ParticleEmitter(Startpos)
 
 
-		for i = 1, 20 do
-			local p = self.Emitter:Add("particles/flamelet1", Startpos)
-			if not has_burner then
-				p:SetColor(105, 255, 50)
-			else
-				p:SetColor(0,100,255)
-			end
-			p:SetDieTime(1)
-			p:SetStartAlpha(100)
-			p:SetEndAlpha(0)
-			p:SetStartSize(math.Rand(0.8, 1.5))
-			p:SetEndSize(math.random(50, 75))
-			p:SetRoll(math.random(-10, 10))
-			p:SetRollDelta(math.random(-10, 10))
-			p:SetVelocity(((Hitpos - Startpos):GetNormal() * math.random(500, 800)) + VectorRand() * math.random(1, 20))
-			p:SetCollide(true)
-			p:SetCollideCallback(function()
-			p:SetDieTime(0)
+		for i = 1, 4 do
+			local gflame = self.Emitter:Add("particles/flamelet1", Startpos)
+			gflame:SetColor(105, 255, 50)
+			gflame:SetDieTime(1)
+			gflame:SetStartAlpha(30)
+			gflame:SetEndAlpha(0)
+			gflame:SetStartSize(math.Rand(0.8, 1.5))
+			gflame:SetEndSize(math.random(50, 75))
+			gflame:SetRoll(math.random(-10, 10))
+			gflame:SetRollDelta(math.random(-10, 10))
+			gflame:SetVelocity(((Hitpos - Startpos):GetNormal() * math.random(500, 800)) + VectorRand() * math.random(1, 20))
+			gflame:SetCollide(true)
+			gflame:SetCollideCallback(function()
+			gflame:SetDieTime(0)
 			end)
 		end
-
-		for i = 1, 2 do
-			local p = self.Emitter:Add("particles/smokey", Startpos)
-			p:SetDieTime(1.5)
-			p:SetStartAlpha(50)
-			p:SetEndAlpha(0)
-			p:SetStartSize(math.Rand(2, 4))
-			p:SetEndSize(math.random(70, 90))
-			p:SetRoll(math.random(-10, 10))
-			p:SetRollDelta(math.random(-10, 10))
-			p:SetVelocity(((Hitpos - Startpos):GetNormal() * math.random(500, 800)) + VectorRand() * math.random(1, 60) + Vector(0,0,20))
-			p:SetCollide(true)
-			p:SetColor(40, 40, 40)
+		for i = 1, 10 do
+			local bflame = self.Emitter:Add("particles/flamelet1", Startpos)
+			bflame:SetColor(0,100,255)
+			bflame:SetDieTime(1)
+			bflame:SetStartAlpha(50)
+			bflame:SetEndAlpha(0)
+			bflame:SetStartSize(math.Rand(0.4, 0.75))
+			bflame:SetEndSize(math.random(25, 37.5))
+			bflame:SetRoll(math.random(-10, 10))
+			bflame:SetRollDelta(math.random(-10, 10))
+			bflame:SetVelocity(((Hitpos - Startpos):GetNormal() * math.random(500, 800)) + VectorRand() * math.random(1, 20))
+			bflame:SetCollide(true)
+			bflame:SetCollideCallback(function()
+			bflame:SetDieTime(0)
+			end)
 		end
 
 		self.Emitter:Finish()
