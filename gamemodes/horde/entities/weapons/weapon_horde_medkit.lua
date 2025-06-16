@@ -381,7 +381,21 @@ end
 
 if SERVER then
 	hook.Add( "PlayerDeath", "HordeMedkitRevive", function( ply )
-		ply.Medkit_DeathPos = ply:GetPos()
+		local deathPos = ply:GetPos()
+		local trace = util.TraceHull({
+			start = deathPos,
+			endpos = deathPos - Vector(0, 0, 25000),
+			mins = Vector(-16, -16, 0),
+			maxs = Vector(16, 16, 1),
+			mask = MASK_SOLID,
+			filter = function(ent)
+				if not IsValid(ent) then return true end
+				local class = ent:GetClass()
+				if class == "prop_static" or class == "prop_dynamic" then return true end
+				return false
+			end
+		})
+		ply.Medkit_DeathPos = trace.HitPos or deathPos
 	end )
 
 	function SWEP:RevivePlayer( ply )
@@ -393,10 +407,13 @@ if SERVER then
 		ply.Medkit_DeathPos = nil
 		ply.Medit_Respawning = false
 
+		local owner = self:GetOwner()
+		HORDE.player_revived[ply:SteamID()] = ( HORDE.player_revived[ply:SteamID()] or 0 ) + 1
+		HORDE.player_revives[owner:SteamID()] = ( HORDE.player_revives[owner:SteamID()] or 0 ) + 1
+
 		ply:EmitSound( "ambient/levels/labs/electric_explosion1.wav" )
 		ply:EmitSound( "items/suitchargeok1.wav" )
 
-		local owner = self:GetOwner()
 		owner:Horde_AddMoney( 50 )
 		owner:Horde_SyncEconomy()
 	end

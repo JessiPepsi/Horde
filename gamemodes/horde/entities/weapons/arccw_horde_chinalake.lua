@@ -36,7 +36,7 @@ SWEP.DamageMin = 20 -- damage done at maximum range
 SWEP.Range = 50 -- in METRES
 SWEP.Penetration = 2
 SWEP.DamageType = DMG_BULLET
-SWEP.ShootEntity = "horde_projectile_he_round" -- entity to fire, if any
+SWEP.ShootEntity = "horde_projectile_multi_round" -- entity to fire, if any
 SWEP.MuzzleVelocity = 100000 -- projectile or phys bullet muzzle velocity
 -- IN M/S
 
@@ -68,14 +68,24 @@ end
 
 -- SWEP.Delay = 60 / 300 -- 60 / RPM.
 SWEP.Num = 1 -- number of shots per trigger pull.
+
 SWEP.Firemodes = {
     {
-        PrintName = "fcg.pump",
-        Mode = 1,
+        Mode = 3,
+        PrintName = "Explosive"
     },
     {
-        Mode = 0
-    }
+        Mode = 4,
+        PrintName = "Incendiary"
+    },
+    {
+        Mode = 5,
+        PrintName = "Shock"
+    },
+    {
+        Mode = 6,
+        PrintName = "Cryo"
+    },
 }
 
 SWEP.NPCWeaponType = "weapon_shotgun"

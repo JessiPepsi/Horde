@@ -29,8 +29,8 @@ SWEP.MirrorVMWM = false
 SWEP.WorldModel = "models/weapons/w_pistol.mdl"
 SWEP.ViewModelFOV = 65
 
-SWEP.Damage = 8
-SWEP.DamageMin = 5
+SWEP.Damage = 20
+SWEP.DamageMin = 15
 SWEP.RangeMin = 15
 SWEP.Range = 25
 SWEP.Penetration = 2
@@ -53,9 +53,6 @@ SWEP.Num = 1 -- number of shots per trigger pull.
 SWEP.Firemodes = {
     {
         Mode = 1,
-    },
-    {
-        Mode = 0,
     }
 }
 
